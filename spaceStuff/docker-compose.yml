@@ -1,0 +1,19 @@
+services:
+  # this service outputs raw IQ data containing a DVB-S2 encapsulated MPEG-TS stream to port 8118
+  mpeg_sat:
+    build: ./mpeg_sat
+    ports:
+      - "8118:8118"
+    entrypoint: /home/start_broadcast.sh
+  # this container is for lab users, it uses a shared directory for exercise resources and has tools pre-configured for use in the lab
+  lab_box:
+    build: ./lab_box
+    image: lab_box
+    container_name: lab_box
+    environment:
+      - DISPLAY=${DISPLAY}
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - ~/sat_carving_lab/lab_volume:/lab_resources
+    network_mode: host
+    ipc: host
