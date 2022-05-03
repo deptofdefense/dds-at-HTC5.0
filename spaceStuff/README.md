@@ -5,7 +5,7 @@ Satellite communications are used by millions of people every day. From televisi
 In this lab, you’ll learn about one of the most popular satellite communications protocols - DVB-S (Digital Video Broadcasting for Satellite) - and how anyone with inexpensive radio equipment and freely available software can intercept and listen to these signals.
 
 ## Why This Matters
-It has been demonstrated that hackers can use some of the techniques in this lab to gain access to critical infrastructure control systems (e.g. power plants), eavesdrop on sensitive emails at distances of thousands of miles away from their victims, and even compromise critical in-flight data links on modern aircraft. 
+It has been demonstrated that hackers can use some of the techniques in this lab to gain access to critical infrastructure control systems (e.g. power plants), eavesdrop on sensitive emails at distances of thousands of miles away from their victims, and even compromise critical in-flight data links on modern aircraft.
 
 If you're curious, check out this video to learn more: https://www.youtube.com/watch?v=ku0Q_Wey4K0
 
@@ -146,6 +146,18 @@ If you want to run this exercise with your own videos, you'll need to build a .t
 
 You can convert .mp4 files into .ts files using ffmpeg so that they can be multiplexed by tsduck in the next step.
 
+#### Easy Script
+Provided you have the requisite dependencies installed.
+```bash
+brew install tsduck
+```
+
+You can run the following script to multiplex your videos together.
+
+```bash
+python3 stream_videos.py --video1 video1.filename --video2 video2.filename --output challenge.ts
+``` 
+
 You should find the duration of your longest .mp4 file and remember that. For each of your other files, you should determine how many repetitions will be required to exceed that length and then run loop and trim using ffmpeg. The goal is to have all of your files be the same length before multiplexing:
 ```bash
 ffmpeg -stream_loop [number of interations] -i satcoms_channel_1.mp4 -c copy channel_1_long.mp4
@@ -166,7 +178,7 @@ ffmpeg -i channel_2_reduced.mp4 -mpegts_service_id 2337 -mpegts_start_pid 0x200 
 ### SETUP: Create raw .ts feed
 You can then multiplex your streams into a single satellite telvision station transponder MPEG-TS using tsduck. The easiest way to do this if you only have two streams is to use the ``--interleave`` and ``psimerge`` options. If you have more than two streams it is significantly more complex, the main thing to keep in mind is the base stream for a ``merge`` needs to have sufficient padding to support the additional streams added.
 
-Typically, when using --psimerge, you want to designate the base feed as the one which is most sensitive to bitrate (e.g. if only one has audio). You also need to manually add entries to the service table with svrename for any non-base services you are adding. 
+Typically, when using --psimerge, you want to designate the base feed as the one which is most sensitive to bitrate (e.g. if only one has audio). You also need to manually add entries to the service table with svrename for any non-base services you are adding.
 
 ```bash
 tsp -I file --interleave channel2.ts channel1.ts --label-base 1 -P psimerge --main-label 1 --merge-label 2 -P svrename 1337 -n "HackerSatTV One" -P filter -n -p 0x1FFF -O file challenge.ts
